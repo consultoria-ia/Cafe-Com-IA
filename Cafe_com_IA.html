@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Café com IA | Fundação Lemann</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Cabin:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+  <style>
+    :root {
+      --navy: #052B47;
+      --navy-2: #0C436B;
+      --navy-3: #011B2E;
+      --lime: #B2C530;
+      --teal: #00A180;
+      --pink: #DA7680;
+      --white: #FFFFFF;
+      --gray-lt: #F5F7FA;
+      --gray-md: #6B8399;
+      --font-title: 'Montserrat', sans-serif;
+      --font-body: 'Cabin', sans-serif;
+      --ease: cubic-bezier(.59,.07,.27,.94);
+      --ide-bg: #1e1e1e;
+      --ide-panel: #252526;
+      --ide-border: #3c3c3c;
+      --ide-text: #d4d4d4;
+      --ide-muted: #858585;
+      --ide-blue: #569cd6;
+      --ide-cyan: #4ec9b0;
+      --ide-yellow: #dcdcaa;
+      --ide-green: #b5cea8;
+      --ide-orange: #ce9178;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--navy);
+      color: var(--white);
+      font-family: var(--font-body);
+    }
+    button { font: inherit; }
+
+    #deck {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+      padding-bottom: 56px;
+      background: var(--navy);
+    }
+    .slide {
+      position: absolute;
+      inset: 0 0 56px 0;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(54px);
+      transition: opacity .55s var(--ease), transform .55s var(--ease);
+    }
+    .slide.active {
+      opacity: 1;
+      pointer-events: all;
+      transform: translateX(0);
+    }
+    .slide.exit {
+      opacity: 0;
+      transform: translateX(-54px);
+    }
+
+    .slide-header {
+      height: 74px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 48px;
+      background: var(--navy);
+      border-bottom: 3px solid var(--lime);
+      flex-shrink: 0;
+      z-index: 10;
+    }
+    .fl-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--white);
+      font-family: var(--font-title);
+      font-weight: 800;
+      letter-spacing: -.02em;
+      font-size: 18px;
+      line-height: 1;
+      width: 150px;
+      height: 35px;
+      font-size: 0;
+      color: transparent;
+      background: transparent url("assets/lemann_logo_flat_transparent.png") left center / contain no-repeat;
+      border-radius: 0;
+      box-shadow: none;
+    }
+    .fl-mark {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      color: var(--lime);
+    }
+    .fl-logo .fl-mark { display: none; }
+    .fl-mark svg { width: 100%; height: 100%; }
+    .slide-tag {
+      font-size: .7em;
+      font-weight: 700;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--lime);
+      background: rgba(178,197,48,.12);
+      border: 1px solid rgba(178,197,48,.3);
+      border-radius: 20px;
+      padding: 5px 14px;
+    }
+    .slide-body {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: stretch;
+      overflow: hidden;
+    }
+
+    .deco-wave, .deco-symbol {
+      position: absolute;
+      pointer-events: none;
+      opacity: .08;
+    }
+    .deco-wave {
+      left: -90px;
+      bottom: -110px;
+      width: min(62vw, 760px);
+      height: 270px;
+    }
+    .deco-symbol {
+      right: -80px;
+      bottom: -80px;
+      width: 280px;
+      height: 300px;
+      opacity: .055;
+    }
+
+    .slide--cover .slide-body {
+      background:
+        radial-gradient(circle at 88% 10%, rgba(178,197,48,.16), transparent 28%),
+        radial-gradient(circle at 12% 92%, rgba(0,161,128,.16), transparent 30%),
+        var(--navy);
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 48px;
+    }
+    .cover-inner {
+      position: relative;
+      z-index: 2;
+      max-width: 1120px;
+      padding-top: 18px;
+    }
+    .cover-logo {
+      display: block;
+      width: min(224px, 43vw);
+      height: auto;
+      margin: 0 auto 28px;
+      border-radius: 0;
+      box-shadow: none;
+    }
+    .cafe-logo {
+      display: block;
+      width: min(676px, 86vw);
+      height: auto;
+      margin: 0 auto 24px;
+      filter: drop-shadow(0 22px 54px rgba(1,27,46,.28));
+    }
+    .slide--cover .cover-logo {
+      margin-top: 18px;
+      margin-bottom: 24px;
+    }
+    .cover-label, .sec-label {
+      font-size: .72em;
+      font-weight: 700;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 14px;
+    }
+    .cover-title {
+      font-family: var(--font-title);
+      font-size: clamp(54px, 7.2vw, 112px);
+      font-weight: 800;
+      color: var(--white);
+      line-height: .94;
+      letter-spacing: -.045em;
+      margin-bottom: 26px;
+    }
+    .cover-title span { color: var(--lime); }
+    .cover-sub {
+      max-width: 720px;
+      margin: 0 auto 26px;
+      color: rgba(255,255,255,.68);
+      font-size: 1.18em;
+      line-height: 1.6;
+    }
+    .cover-divider {
+      width: 72px;
+      height: 4px;
+      margin: 0 auto 28px;
+      border-radius: 2px;
+      background: var(--lime);
+    }
+    .cover-chips {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .cover-chip {
+      color: var(--navy);
+      background: var(--lime);
+      border-radius: 20px;
+      padding: 8px 18px;
+      font-size: .78em;
+      font-weight: 700;
+      letter-spacing: .04em;
+    }
+    .cover-chip.teal { background: var(--teal); color: var(--white); }
+
+    .layout-two {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+    .layout-left {
+      position: relative;
+      overflow: hidden;
+      background: var(--navy);
+      padding: 56px 64px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .layout-right {
+      background: var(--gray-lt);
+      padding: 56px 64px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      overflow-y: auto;
+    }
+    .layout-full {
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+      background: var(--navy);
+      padding: 58px 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .layout-three {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .col-card {
+      padding: 52px 42px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 18px;
+      background: var(--navy);
+    }
+    .col-card:nth-child(2) { background: var(--navy-2); }
+    .col-card:nth-child(3) { background: #0a3a5e; }
+    .layout-ba {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: var(--navy);
+    }
+    .ba-col {
+      padding: 54px 64px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .ba-col:first-child { border-right: 1px solid rgba(255,255,255,.08); }
+    .ba-objetivo {
+      grid-column: 1 / -1;
+      padding: 26px 64px;
+      background: rgba(0,161,128,.1);
+      border-top: 1px solid rgba(0,161,128,.2);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .sec-title {
+      font-family: var(--font-title);
+      font-size: clamp(34px, 4.3vw, 64px);
+      font-weight: 800;
+      color: var(--white);
+      line-height: 1.04;
+      letter-spacing: -.035em;
+      margin-bottom: 16px;
+    }
+    .sec-title.dark { color: var(--navy); }
+    .sec-title span { color: var(--lime); }
+    .sec-title.dark span { color: var(--teal); }
+    .sec-sub {
+      max-width: 650px;
+      color: rgba(255,255,255,.66);
+      font-size: 1.02em;
+      line-height: 1.62;
+      margin-bottom: 26px;
+    }
+    .sec-sub.dark { color: var(--navy-2); }
+    .divider-lime, .divider-teal {
+      width: 48px;
+      height: 3px;
+      border-radius: 2px;
+      margin-bottom: 24px;
+      background: var(--lime);
+    }
+    .divider-teal { background: var(--teal); }
+
+    .item-list, .check-list, .ba-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .item-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      color: rgba(255,255,255,.86);
+      line-height: 1.46;
+      font-size: .96em;
+    }
+    .item-list li::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      margin-top: 8px;
+      flex-shrink: 0;
+      background: var(--lime);
+    }
+    .item-list.dark li { color: var(--navy-3); }
+    .item-list.dark li::before { background: var(--teal); }
+    .check-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      color: rgba(255,255,255,.9);
+      line-height: 1.48;
+      font-size: .98em;
+    }
+    .ck {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--teal);
+      color: var(--white);
+      flex-shrink: 0;
+      margin-top: 1px;
+      font-size: 12px;
+    }
+
+    .callout {
+      border-left: 4px solid var(--lime);
+      border-radius: 0 8px 8px 0;
+      background: rgba(178,197,48,.1);
+      padding: 18px 20px;
+    }
+    .callout.teal {
+      border-left-color: var(--teal);
+      background: rgba(0,161,128,.1);
+    }
+    .callout.pink {
+      border-left-color: var(--pink);
+      background: rgba(218,118,128,.12);
+    }
+    .callout.dark {
+      border-left-color: var(--teal);
+      background: rgba(0,161,128,.09);
+    }
+    .callout-label {
+      font-size: .68em;
+      font-weight: 700;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--lime);
+      margin-bottom: 7px;
+    }
+    .callout.teal .callout-label, .callout.dark .callout-label { color: var(--teal); }
+    .callout.pink .callout-label { color: var(--pink); }
+    .callout p {
+      color: rgba(255,255,255,.86);
+      font-size: .93em;
+      line-height: 1.55;
+    }
+    .callout.dark p { color: var(--navy-2); }
+
+    .concept-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-top: 10px;
+    }
+    .concept-card {
+      position: relative;
+      min-height: 210px;
+      border-radius: 14px;
+      padding: 22px;
+      background: var(--white);
+      border: 1px solid rgba(5,43,71,.08);
+      box-shadow: 0 20px 44px rgba(5,43,71,.08);
+      overflow: hidden;
+    }
+    .concept-card::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 6px;
+      background: var(--lime);
+    }
+    .concept-card:nth-child(2)::after { background: var(--teal); }
+    .concept-card:nth-child(3)::after { background: var(--pink); }
+    .concept-card:nth-child(4)::after { background: var(--navy-2); }
+    .concept-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 18px;
+      background: rgba(178,197,48,.18);
+      color: var(--navy);
+      font-size: 22px;
+    }
+    .concept-card:nth-child(2) .concept-icon { background: rgba(0,161,128,.15); }
+    .concept-card:nth-child(3) .concept-icon { background: rgba(218,118,128,.18); }
+    .concept-card h3 {
+      font-family: var(--font-title);
+      font-size: 1.15em;
+      color: var(--navy);
+      margin-bottom: 10px;
+    }
+    .concept-card p {
+      color: var(--navy-2);
+      line-height: 1.5;
+      font-size: .9em;
+    }
+
+    .agenda-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 14px;
+      margin-top: 30px;
+    }
+    .agenda-step {
+      min-height: 195px;
+      background: rgba(255,255,255,.055);
+      border: 1px solid rgba(178,197,48,.26);
+      border-radius: 12px;
+      padding: 22px 18px;
+    }
+    .agenda-time {
+      color: var(--lime);
+      font-size: .68em;
+      font-weight: 700;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .agenda-title {
+      font-family: var(--font-title);
+      font-size: 1.06em;
+      color: var(--white);
+      font-weight: 800;
+      line-height: 1.18;
+      margin-bottom: 10px;
+    }
+    .agenda-text { color: rgba(255,255,255,.64); line-height: 1.45; font-size: .86em; }
+
+    .flow {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 0;
+      margin-top: 22px;
+    }
+    .flow-box {
+      border: 1px solid rgba(178,197,48,.32);
+      border-radius: 8px;
+      padding: 11px 16px;
+      background: rgba(255,255,255,.06);
+      color: var(--white);
+      font-size: .84em;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .flow-arrow {
+      color: var(--lime);
+      font-size: 1.15em;
+      padding: 0 8px;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 26px;
+    }
+    .code-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      min-height: 42px;
+      border-radius: 8px;
+      padding: 10px 16px;
+      border: 1px solid rgba(178,197,48,.38);
+      background: rgba(178,197,48,.1);
+      color: var(--lime);
+      cursor: pointer;
+      font-size: .82em;
+      font-weight: 700;
+      letter-spacing: .02em;
+      transition: background .2s var(--ease), transform .2s var(--ease);
+    }
+    .code-btn:hover { background: rgba(178,197,48,.18); transform: translateY(-1px); }
+    .code-btn.dark {
+      color: var(--navy);
+      border-color: rgba(5,43,71,.18);
+      background: rgba(5,43,71,.06);
+    }
+    .code-btn.dark:hover { background: rgba(5,43,71,.1); }
+
+    .mini-ide {
+      overflow: hidden;
+      border-radius: 12px;
+      background: var(--ide-bg);
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 28px 64px rgba(1,27,46,.18);
+    }
+    .mini-ide__bar {
+      height: 38px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 14px;
+      background: var(--ide-panel);
+      border-bottom: 1px solid var(--ide-border);
+    }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot.red { background: #ff5f57; }
+    .dot.yellow { background: #febc2e; }
+    .dot.green { background: #28c840; }
+    .mini-ide__tab {
+      margin-left: 14px;
+      height: 30px;
+      display: inline-flex;
+      align-items: center;
+      padding: 0 12px;
+      border-radius: 6px 6px 0 0;
+      background: var(--ide-bg);
+      color: var(--ide-text);
+      font: 12px Consolas, "Cascadia Code", monospace;
+    }
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      overflow: auto;
+      font: 14px/1.58 Consolas, "Cascadia Code", "SFMono-Regular", monospace;
+      color: var(--ide-text);
+    }
+    .mini-ide pre { padding: 22px 24px; max-height: 390px; }
+    .tok-blue { color: var(--ide-blue); }
+    .tok-cyan { color: var(--ide-cyan); }
+    .tok-yellow { color: var(--ide-yellow); }
+    .tok-green { color: var(--ide-green); }
+    .tok-orange { color: var(--ide-orange); }
+    .tok-muted { color: var(--ide-muted); }
+
+    .ba-title {
+      font-family: var(--font-title);
+      font-size: 1.2em;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+    .ba-title.antes { color: var(--pink); }
+    .ba-title.depois { color: var(--lime); }
+    .ba-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      color: rgba(255,255,255,.82);
+      line-height: 1.46;
+      font-size: .94em;
+    }
+    .ba-list .ico { flex-shrink: 0; margin-top: 1px; }
+    .ba-objetivo p { color: rgba(255,255,255,.86); line-height: 1.5; }
+    .ba-objetivo .hl { color: var(--lime); font-weight: 800; }
+
+    .final-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-top: 34px;
+    }
+    .final-card {
+      border-radius: 14px;
+      padding: 22px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(178,197,48,.24);
+    }
+    .final-card strong {
+      display: block;
+      color: var(--lime);
+      font-family: var(--font-title);
+      font-size: 1.05em;
+      margin-bottom: 8px;
+    }
+    .final-card span { color: rgba(255,255,255,.7); line-height: 1.45; font-size: .9em; }
+
+    #nav-bar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 56px;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      background: rgba(5,43,71,.98);
+      border-top: 1px solid rgba(178,197,48,.2);
+      backdrop-filter: blur(10px);
+    }
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(178,197,48,.35);
+      border-radius: 8px;
+      background: none;
+      padding: 8px 18px;
+      color: var(--lime);
+      cursor: pointer;
+      font-size: .78em;
+      font-weight: 700;
+      transition: background .2s var(--ease), border-color .2s var(--ease);
+    }
+    .nav-btn:hover { background: rgba(178,197,48,.12); border-color: var(--lime); }
+    .nav-btn:disabled { opacity: .3; cursor: default; pointer-events: none; }
+    #progress-wrap { display: flex; align-items: center; gap: 10px; }
+    .prog-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.22);
+      cursor: pointer;
+      transition: all .25s var(--ease);
+    }
+    .prog-dot.active { background: var(--lime); transform: scale(1.42); }
+    #slide-counter {
+      min-width: 64px;
+      color: var(--gray-md);
+      font-size: .76em;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 34px;
+      background: rgba(1,27,46,.84);
+      backdrop-filter: blur(14px);
+    }
+    .modal.is-open { display: flex; }
+    .modal-dialog {
+      width: min(1120px, 94vw);
+      max-height: 88vh;
+      overflow: hidden;
+      border-radius: 14px;
+      background: var(--ide-bg);
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 44px 100px rgba(0,0,0,.5);
+    }
+    .modal-top {
+      height: 46px;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      padding: 0 14px;
+      background: var(--ide-panel);
+      border-bottom: 1px solid var(--ide-border);
+    }
+    .traffic { display: flex; gap: 8px; }
+    .modal-file {
+      justify-self: center;
+      color: #ccc;
+      font: 13px Consolas, "Cascadia Code", monospace;
+    }
+    .modal-close {
+      justify-self: end;
+      width: 32px;
+      height: 32px;
+      border: 0;
+      border-radius: 6px;
+      display: grid;
+      place-items: center;
+      color: var(--ide-text);
+      background: transparent;
+      cursor: pointer;
+    }
+    .modal-close:hover { background: rgba(255,255,255,.08); }
+    .modal pre { padding: 28px 32px; max-height: calc(88vh - 46px); }
+
+    @media (max-width: 1100px) {
+      .layout-two, .layout-ba { grid-template-columns: 1fr; }
+      .layout-three, .concept-grid, .final-grid { grid-template-columns: repeat(2, 1fr); }
+      .agenda-grid { grid-template-columns: repeat(3, 1fr); }
+      .slide { overflow: auto; }
+    }
+    @media (max-width: 760px) {
+      html, body { overflow: auto; }
+      #deck { height: auto; min-height: 100vh; padding-bottom: 0; overflow: visible; }
+      .slide { position: relative; inset: auto; min-height: 100vh; display: none; transform: none; }
+      .slide.active { display: flex; }
+      .slide-header { padding: 14px 20px; }
+      .layout-full, .layout-left, .layout-right, .ba-col { padding: 36px 24px; }
+      .layout-three, .concept-grid, .final-grid, .agenda-grid { grid-template-columns: 1fr; }
+      #nav-bar { position: sticky; }
+    }
+  </style>
+</head>
+<body>
+  <div id="deck">
+    <section class="slide slide--cover active">
+      <div class="slide-body">
+        <svg class="deco-wave" viewBox="0 0 900 260" aria-hidden="true">
+          <path d="M-20 210 C160 50, 330 26, 520 90 C660 137, 760 184, 930 48" fill="none" stroke="#B2C530" stroke-width="30" stroke-linecap="round"/>
+          <path d="M-10 245 C170 90, 355 78, 560 142 C700 185, 795 220, 925 130" fill="none" stroke="#00A180" stroke-width="24" stroke-linecap="round"/>
+          <path d="M20 168 C175 20, 385 0, 590 62 C725 104, 800 142, 890 80" fill="none" stroke="#DA7680" stroke-width="18" stroke-linecap="round"/>
+        </svg>
+        <svg class="deco-symbol" viewBox="0 0 220 240" aria-hidden="true">
+          <path d="M170 8c-8 38-35 68-80 108-35 31-55 60-70 100" fill="none" stroke="#B2C530" stroke-width="18" stroke-linecap="round"/>
+          <path d="M205 28c5 44-20 80-64 124-24 24-45 48-62 76" fill="none" stroke="#00A180" stroke-width="18" stroke-linecap="round"/>
+          <path d="M70 36c-24 20-40 42-50 70 20 18 36 34 52 52" fill="none" stroke="#DA7680" stroke-width="18" stroke-linecap="round"/>
+        </svg>
+        <div class="cover-inner">
+          <img class="cover-logo" src="assets/lemann_logo_flat_transparent.png" alt="Fundação Lemann"/>
+          <img class="cafe-logo" src="assets/cafe_com_ia_logo.png" alt="Café com IA"/>
+          <p class="cover-sub">Uma oficina prática para criar, do zero, um projeto, um plugin, skills e automações no Codex.</p>
+          <div class="cover-divider"></div>
+          <div class="cover-chips">
+            <span class="cover-chip">Projeto</span>
+            <span class="cover-chip teal">Plugin</span>
+            <span class="cover-chip">Skills</span>
+            <span class="cover-chip teal">Automações</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <header class="slide-header">
+        <div class="fl-logo"><span class="fl-mark"><svg viewBox="0 0 36 36"><path d="M27 2c-1 7-5 12-12 18-5 5-8 9-10 15" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M34 5c1 8-3 14-10 21-3 3-6 6-8 10" fill="none" stroke="#00A180" stroke-width="3.5" stroke-linecap="round"/></svg></span>Fundação Lemann</div>
+        <div class="slide-tag">Conceitos</div>
+      </header>
+      <div class="slide-body">
+        <div class="layout-two">
+          <div class="layout-left">
+            <svg class="deco-wave" viewBox="0 0 900 260"><path d="M-20 210 C160 50,330 26,520 90 C660 137,760 184,930 48" fill="none" stroke="#B2C530" stroke-width="30" stroke-linecap="round"/></svg>
+            <div class="sec-label">A escada da aula</div>
+            <h2 class="sec-title">De uso pontual para <span>rotinas de IA</span>.</h2>
+            <div class="divider-lime"></div>
+            <p class="sec-sub">O objetivo é tirar a IA do improviso: organizar contexto, ensinar um padrão, empacotar capacidades e agendar uma rotina.</p>
+          </div>
+          <div class="layout-right">
+            <div class="concept-grid">
+              <div class="concept-card"><div class="concept-icon"><i class="bi bi-folder2-open"></i></div><h3>Projeto</h3><p>A pasta de trabalho onde ficam contexto, referências, rascunhos e entregáveis.</p></div>
+              <div class="concept-card"><div class="concept-icon"><i class="bi bi-lightning-charge"></i></div><h3>Skill</h3><p>Um manual reutilizável que ensina o Codex a executar uma tarefa do seu jeito.</p></div>
+              <div class="concept-card"><div class="concept-icon"><i class="bi bi-box-seam"></i></div><h3>Plugin</h3><p>Um pacote que organiza skills, scripts, assets e integrações.</p></div>
+              <div class="concept-card"><div class="concept-icon"><i class="bi bi-clock-history"></i></div><h3>Automação</h3><p>Uma rotina programada para o trabalho acontecer no momento certo.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <header class="slide-header">
+        <div class="fl-logo"><span class="fl-mark"><svg viewBox="0 0 36 36"><path d="M27 2c-1 7-5 12-12 18-5 5-8 9-10 15" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M34 5c1 8-3 14-10 21-3 3-6 6-8 10" fill="none" stroke="#00A180" stroke-width="3.5" stroke-linecap="round"/></svg></span>Fundação Lemann</div>
+        <div class="slide-tag">Agenda</div>
+      </header>
+      <div class="slide-body">
+        <div class="layout-full">
+          <svg class="deco-symbol" viewBox="0 0 220 240"><path d="M170 8c-8 38-35 68-80 108-35 31-55 60-70 100" fill="none" stroke="#B2C530" stroke-width="18" stroke-linecap="round"/><path d="M205 28c5 44-20 80-64 124-24 24-45 48-62 76" fill="none" stroke="#00A180" stroke-width="18" stroke-linecap="round"/></svg>
+          <div class="sec-label">Roteiro sugerido</div>
+          <h2 class="sec-title">Uma aula para construir <span>ao vivo</span>.</h2>
+          <p class="sec-sub">Cada bloco avança um nível: contexto, padrão, pacote e rotina. O aluno entende porque está fazendo antes de copiar qualquer arquivo.</p>
+          <div class="agenda-grid">
+            <div class="agenda-step"><div class="agenda-time">10 min</div><div class="agenda-title">Abertura</div><p class="agenda-text">O que vamos construir e o vocabulário mínimo.</p></div>
+            <div class="agenda-step"><div class="agenda-time">25 min</div><div class="agenda-title">Projeto</div><p class="agenda-text">Pasta, README, referências e entregáveis.</p></div>
+            <div class="agenda-step"><div class="agenda-time">45 min</div><div class="agenda-title">Skill</div><p class="agenda-text">Quando usar, como agir e formato de saída.</p></div>
+            <div class="agenda-step"><div class="agenda-time">45 min</div><div class="agenda-title">Plugin</div><p class="agenda-text">Empacotar capacidades para reutilização.</p></div>
+            <div class="agenda-step"><div class="agenda-time">35 min</div><div class="agenda-title">Automação</div><p class="agenda-text">Transformar a skill em rotina concreta.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <header class="slide-header">
+        <div class="fl-logo"><span class="fl-mark"><svg viewBox="0 0 36 36"><path d="M27 2c-1 7-5 12-12 18-5 5-8 9-10 15" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M34 5c1 8-3 14-10 21-3 3-6 6-8 10" fill="none" stroke="#00A180" stroke-width="3.5" stroke-linecap="round"/></svg></span>Fundação Lemann</div>
+        <div class="slide-tag">Projeto</div>
+      </header>
+      <div class="slide-body">
+        <div class="layout-two">
+          <div class="layout-left">
+            <div class="sec-label">Parte 1</div>
+            <h2 class="sec-title">Projeto é a <span>mesa de trabalho</span>.</h2>
+            <div class="divider-lime"></div>
+            <ul class="check-list">
+              <li><span class="ck"><i class="bi bi-check-lg"></i></span><span><strong>work/</strong> para rascunhos, testes e explorações.</span></li>
+              <li><span class="ck"><i class="bi bi-check-lg"></i></span><span><strong>outputs/</strong> para entregáveis finais.</span></li>
+              <li><span class="ck"><i class="bi bi-check-lg"></i></span><span><strong>references/</strong> para materiais que dão contexto.</span></li>
+            </ul>
+            <div class="button-row"><button class="code-btn" data-modal="modal-projeto"><i class="bi bi-code-square"></i> Ver estrutura</button></div>
+          </div>
+          <div class="layout-right">
+            <div class="mini-ide">
+              <div class="mini-ide__bar"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span><span class="mini-ide__tab">README.md</span></div>
+              <pre><span class="tok-blue">#</span> Meu Assistente de Eventos
+
+Este projeto ajuda a preparar eventos com:
+<span class="tok-green">-</span> checklist de produção
+<span class="tok-green">-</span> roteiro de aula
+<span class="tok-green">-</span> mensagens para participantes
+<span class="tok-green">-</span> resumo pós-evento</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <header class="slide-header">
+        <div class="fl-logo"><span class="fl-mark"><svg viewBox="0 0 36 36"><path d="M27 2c-1 7-5 12-12 18-5 5-8 9-10 15" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M34 5c1 8-3 14-10 21-3 3-6 6-8 10" fill="none" stroke="#00A180" stroke-width="3.5" stroke-linecap="round"/></svg></span>Fundação Lemann</div>
+        <div class="slide-tag">Skill</div>
+      </header>
+      <div class="slide-body">
+        <div class="layout-three">
+          <div class="col-card">
+            <div class="sec-label">Quando usar</div>
+            <h2 class="sec-title" style="font-size:2.2em">A descrição é o gatilho.</h2>
+            <p class="sec-sub">Ela diz ao Codex em quais situações a skill deve ser carregada.</p>
+            <div class="callout"><div class="callout-label">Regra</div><p>Descrição boa é específica o bastante para evitar uso errado.</p></div>
+          </div>
+          <div class="col-card">
+            <div class="sec-label">Como agir</div>
+            <h2 class="sec-title" style="font-size:2.2em">O fluxo reduz ambiguidade.</h2>
+            <ul class="item-list">
+              <li>Identificar público, duração e objetivo.</li>
+              <li>Criar agenda com teoria, demonstração e prática.</li>
+              <li>Gerar checklist e próximos passos.</li>
+            </ul>
+          </div>
+          <div class="col-card">
+            <div class="sec-label">O que entregar</div>
+            <h2 class="sec-title" style="font-size:2.2em">O formato vira padrão.</h2>
+            <p class="sec-sub">Para iniciantes, a skill precisa dizer o que evitar: jargão, excesso de abstração e respostas sem exemplo.</p>
+            <button class="code-btn" data-modal="modal-skill"><i class="bi bi-filetype-md"></i> Ver SKILL.md</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <header class="slide-header">
+        <div class="fl-logo"><span class="fl-mark"><svg viewBox="0 0 36 36"><path d="M27 2c-1 7-5 12-12 18-5 5-8 9-10 15" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M34 5c1 8-3 14-10 21-3 3-6 6-8 10" fill="none" stroke="#00A180" stroke-width="3.5" stroke-linecap="round"/></svg></span>Fundação Lemann</div>
+        <div class="slide-tag">Plugin</div>
+      </header>
+      <div class="slide-body">
+        <div class="layout-two">
+          <div class="layout-left">
+            <div class="sec-label">Parte 3</div>
+            <h2 class="sec-title">Plugin é o pacote que <span>organiza capacidades</span>.</h2>
+            <div class="divider-lime"></div>
+            <p class="sec-sub">Para iniciantes, comece simples: um plugin com uma skill clara. Depois adicione assets, scripts e integrações quando houver necessidade real.</p>
+            <div class="flow">
+              <span class="flow-box">Skill</span><span class="flow-arrow">→</span>
+              <span class="flow-box">Plugin</span><span class="flow-arrow">→</span>
+              <span class="flow-box">Instalar</span><span class="flow-arrow">→</span>
+              <span class="flow-box">Reutilizar</span>
+            </div>
+            <div class="button-row">
+              <button class="code-btn" data-modal="modal-plugin"><i class="bi bi-braces"></i> plugin.json</button>
+              <button class="code-btn" data-modal="modal-arvore"><i class="bi bi-diagram-3"></i> árvore</button>
+            </div>
+          </div>
+          <div class="layout-right">
+            <div class="sec-label" style="color:var(--teal)">Dentro do pacote</div>
+            <h3 class="sec-title dark" style="font-size:2.35em">O plugin transforma conhecimento em produto interno.</h3>
+            <div class="divider-teal"></div>
+            <ul class="item-list dark">
+              <li><strong>Skills</strong> para procedimentos reutilizáveis.</li>
+              <li><strong>Assets</strong> para templates, exemplos e materiais.</li>
+              <li><strong>Scripts</strong> para tarefas repetitivas ou frágeis.</li>
+              <li><strong>Integrações</strong> quando o fluxo precisar conversar com outras ferramentas.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <header class="slide-header">
+        <div class="fl-logo"><span class="fl-mark"><svg viewBox="0 0 36 36"><path d="M27 2c-1 7-5 12-12 18-5 5-8 9-10 15" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M34 5c1 8-3 14-10 21-3 3-6 6-8 10" fill="none" stroke="#00A180" stroke-width="3.5" stroke-linecap="round"/></svg></span>Fundação Lemann</div>
+        <div class="slide-tag">Antes e depois</div>
+      </header>
+      <div class="slide-body">
+        <div class="layout-ba">
+          <div class="ba-col">
+            <div class="sec-label">Prompt solto</div>
+            <div class="ba-title antes">Funciona uma vez</div>
+            <ul class="ba-list">
+              <li><span class="ico" style="color:var(--pink)">×</span><span>Depende de repetir contexto toda vez.</span></li>
+              <li><span class="ico" style="color:var(--pink)">×</span><span>O padrão muda de acordo com o prompt do dia.</span></li>
+              <li><span class="ico" style="color:var(--pink)">×</span><span>Difícil de compartilhar com outra pessoa.</span></li>
+            </ul>
+            <div class="callout pink"><div class="callout-label">Risco</div><p>O conhecimento fica preso na conversa, não no sistema.</p></div>
+          </div>
+          <div class="ba-col">
+            <div class="sec-label">Skill + plugin + automação</div>
+            <div class="ba-title depois">Vira capacidade recorrente</div>
+            <ul class="ba-list">
+              <li><span class="ico" style="color:var(--lime)">✓</span><span>O comportamento fica documentado e reutilizável.</span></li>
+              <li><span class="ico" style="color:var(--lime)">✓</span><span>O plugin organiza a capacidade como pacote.</span></li>
+              <li><span class="ico" style="color:var(--lime)">✓</span><span>A automação executa a rotina sem novo pedido manual.</span></li>
+            </ul>
+            <div class="callout teal"><div class="callout-label">Ganho</div><p>O time passa a operar com padrões, não só com prompts.</p></div>
+          </div>
+          <div class="ba-objetivo">
+            <i class="bi bi-stars" style="color:var(--lime);font-size:24px"></i>
+            <p><span class="hl">Mensagem central:</span> prompt resolve uma tarefa; skill cria padrão; plugin empacota capacidades; automação cria rotina.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <header class="slide-header">
+        <div class="fl-logo"><span class="fl-mark"><svg viewBox="0 0 36 36"><path d="M27 2c-1 7-5 12-12 18-5 5-8 9-10 15" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M34 5c1 8-3 14-10 21-3 3-6 6-8 10" fill="none" stroke="#00A180" stroke-width="3.5" stroke-linecap="round"/></svg></span>Fundação Lemann</div>
+        <div class="slide-tag">Automações</div>
+      </header>
+      <div class="slide-body">
+        <div class="layout-two">
+          <div class="layout-left">
+            <div class="sec-label">Parte 4</div>
+            <h2 class="sec-title">Automação é a IA como <span>rotina combinada</span>.</h2>
+            <div class="divider-lime"></div>
+            <p class="sec-sub">A automação boa explicita frequência, tarefa, contexto e formato esperado.</p>
+            <button class="code-btn" data-modal="modal-automacao"><i class="bi bi-clock-history"></i> Ver exemplos</button>
+          </div>
+          <div class="layout-right">
+            <div class="callout dark">
+              <div class="callout-label">Modelo</div>
+              <p>Todo [frequência], use a skill [nome] para [tarefa] e entregue [formato esperado].</p>
+            </div>
+            <div style="height:20px"></div>
+            <ul class="item-list dark">
+              <li>Todo dia às 9h: revisar pendências do evento.</li>
+              <li>Na véspera: gerar roteiro, materiais e mensagem aos participantes.</li>
+              <li>Toda sexta: resumir aprendizados e sugerir melhorias.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <header class="slide-header">
+        <div class="fl-logo"><span class="fl-mark"><svg viewBox="0 0 36 36"><path d="M27 2c-1 7-5 12-12 18-5 5-8 9-10 15" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M34 5c1 8-3 14-10 21-3 3-6 6-8 10" fill="none" stroke="#00A180" stroke-width="3.5" stroke-linecap="round"/></svg></span>Fundação Lemann</div>
+        <div class="slide-tag">Prática final</div>
+      </header>
+      <div class="slide-body">
+        <div class="layout-full">
+          <div class="sec-label">Exercício</div>
+          <h2 class="sec-title">Cada pessoa sai com um <span>miniassistente pessoal</span>.</h2>
+          <p class="sec-sub">A entrega final é pequena, concreta e apresentável em dois minutos.</p>
+          <div class="final-grid">
+            <div class="final-card"><strong>1. Problema</strong><span>Escolha uma tarefa recorrente: reunião, aula, evento, comunicação ou relatório.</span></div>
+            <div class="final-card"><strong>2. Skill</strong><span>Escreva quando usar, fluxo de trabalho, estilo e formato de saída.</span></div>
+            <div class="final-card"><strong>3. Plugin</strong><span>Empacote a skill com nome, descrição e estrutura simples.</span></div>
+            <div class="final-card"><strong>4. Automação</strong><span>Defina a rotina: frequência, contexto e entrega esperada.</span></div>
+          </div>
+          <div class="button-row"><button class="code-btn" data-modal="modal-entrega"><i class="bi bi-list-check"></i> Modelo de entrega</button></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="slide-body">
+        <div class="layout-full" style="align-items:center;text-align:center">
+          <svg class="deco-wave" viewBox="0 0 900 260"><path d="M-20 210 C160 50,330 26,520 90 C660 137,760 184,930 48" fill="none" stroke="#B2C530" stroke-width="30" stroke-linecap="round"/><path d="M-10 245 C170 90,355 78,560 142 C700 185,795 220,925 130" fill="none" stroke="#00A180" stroke-width="24" stroke-linecap="round"/></svg>
+          <img class="cover-logo" src="assets/lemann_logo_flat_transparent.png" alt="Fundação Lemann" style="width:min(208px,42vw);margin-bottom:30px"/>
+          <div class="sec-label" style="text-align:center">Fechamento</div>
+          <h2 class="sec-title" style="max-width:920px">A melhor skill não é a mais longa. É a que <span>reduz ambiguidade</span>.</h2>
+          <p class="sec-sub" style="margin-left:auto;margin-right:auto">Projeto organiza o trabalho. Skill ensina o comportamento. Plugin empacota capacidades. Automação cria rotina.</p>
+          <div class="cover-divider"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <nav id="nav-bar" aria-label="Navegação dos slides">
+    <button class="nav-btn" id="prev-btn" type="button" disabled><i class="bi bi-chevron-left"></i> Anterior</button>
+    <div id="progress-wrap"></div>
+    <div id="slide-counter">1 / 9</div>
+    <button class="nav-btn" id="next-btn" type="button">Próximo <i class="bi bi-chevron-right"></i></button>
+  </nav>
+
+  <div class="modal" id="modal-projeto" role="dialog" aria-modal="true" aria-label="Estrutura do projeto">
+    <div class="modal-dialog">
+      <div class="modal-top"><div class="traffic"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div><div class="modal-file">estrutura-do-projeto.txt</div><button class="modal-close" data-close type="button"><i class="bi bi-x-lg"></i></button></div>
+      <pre>meu-assistente-eventos/
+  work/
+  outputs/
+  references/
+  README.md
+
+<span class="tok-muted"># README.md</span>
+<span class="tok-blue">#</span> Meu Assistente de Eventos
+
+Este projeto ajuda a preparar eventos com:
+<span class="tok-green">-</span> checklist de produção
+<span class="tok-green">-</span> roteiro de aula
+<span class="tok-green">-</span> mensagens para participantes
+<span class="tok-green">-</span> resumo pós-evento</pre>
+    </div>
+  </div>
+
+  <div class="modal" id="modal-skill" role="dialog" aria-modal="true" aria-label="Exemplo de SKILL.md">
+    <div class="modal-dialog">
+      <div class="modal-top"><div class="traffic"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div><div class="modal-file">SKILL.md</div><button class="modal-close" data-close type="button"><i class="bi bi-x-lg"></i></button></div>
+      <pre><span class="tok-muted">---</span>
+<span class="tok-blue">name</span>: <span class="tok-orange">preparador-de-eventos</span>
+<span class="tok-blue">description</span>: <span class="tok-orange">Use quando o usuário quiser preparar conteúdo, roteiro, checklist, materiais ou comunicações para eventos, aulas e workshops.</span>
+<span class="tok-muted">---</span>
+
+<span class="tok-blue">#</span> Preparador De Eventos
+
+Ajude a transformar uma ideia de evento em materiais práticos.
+
+<span class="tok-blue">##</span> Fluxo
+
+<span class="tok-green">1.</span> Identifique público, duração e objetivo.
+<span class="tok-green">2.</span> Crie uma agenda clara.
+<span class="tok-green">3.</span> Separe teoria, demonstração e prática.
+<span class="tok-green">4.</span> Gere checklist de preparação.
+<span class="tok-green">5.</span> Sugira materiais de apoio.
+<span class="tok-green">6.</span> Termine com próximos passos objetivos.
+
+<span class="tok-blue">##</span> Estilo
+
+<span class="tok-green">-</span> Use linguagem simples.
+<span class="tok-green">-</span> Priorize exemplos práticos.
+<span class="tok-green">-</span> Evite jargão técnico sem explicação.
+<span class="tok-green">-</span> Para iniciantes, explique um conceito por vez.</pre>
+    </div>
+  </div>
+
+  <div class="modal" id="modal-plugin" role="dialog" aria-modal="true" aria-label="Exemplo de plugin.json">
+    <div class="modal-dialog">
+      <div class="modal-top"><div class="traffic"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div><div class="modal-file">plugin.json</div><button class="modal-close" data-close type="button"><i class="bi bi-x-lg"></i></button></div>
+      <pre>{
+  <span class="tok-blue">"name"</span>: <span class="tok-orange">"meu-plugin-eventos"</span>,
+  <span class="tok-blue">"version"</span>: <span class="tok-orange">"0.1.0"</span>,
+  <span class="tok-blue">"displayName"</span>: <span class="tok-orange">"Meu Plugin De Eventos"</span>,
+  <span class="tok-blue">"description"</span>: <span class="tok-orange">"Plugin com skills para preparar eventos, aulas e workshops."</span>
+}</pre>
+    </div>
+  </div>
+
+  <div class="modal" id="modal-arvore" role="dialog" aria-modal="true" aria-label="Árvore de arquivos do plugin">
+    <div class="modal-dialog">
+      <div class="modal-top"><div class="traffic"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div><div class="modal-file">arvore-do-plugin.txt</div><button class="modal-close" data-close type="button"><i class="bi bi-x-lg"></i></button></div>
+      <pre>meu-plugin-eventos/
+  .codex-plugin/
+    plugin.json
+  skills/
+    preparador-de-eventos/
+      SKILL.md
+  assets/
+  scripts/</pre>
+    </div>
+  </div>
+
+  <div class="modal" id="modal-automacao" role="dialog" aria-modal="true" aria-label="Exemplos de automação">
+    <div class="modal-dialog">
+      <div class="modal-top"><div class="traffic"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div><div class="modal-file">automacoes.txt</div><button class="modal-close" data-close type="button"><i class="bi bi-x-lg"></i></button></div>
+      <pre><span class="tok-muted"># Modelo</span>
+Todo [frequência], use a skill [nome da skill] para [tarefa]
+e me entregue [formato esperado].
+
+<span class="tok-muted"># Exemplo 1</span>
+Todo dia às 9h, use a skill preparador-de-eventos para revisar
+meu checklist do evento e entregar pendências, riscos e próximos passos.
+
+<span class="tok-muted"># Exemplo 2</span>
+Na véspera de cada evento, use a skill preparador-de-eventos para gerar
+roteiro, lista de materiais e mensagem para participantes.
+
+<span class="tok-muted"># Exemplo 3</span>
+Toda sexta-feira às 16h, gere um resumo dos aprendizados da semana
+e sugira melhorias para a próxima aula.</pre>
+    </div>
+  </div>
+
+  <div class="modal" id="modal-entrega" role="dialog" aria-modal="true" aria-label="Modelo de entrega final">
+    <div class="modal-dialog">
+      <div class="modal-top"><div class="traffic"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div><div class="modal-file">entrega-final.md</div><button class="modal-close" data-close type="button"><i class="bi bi-x-lg"></i></button></div>
+      <pre><span class="tok-blue">#</span> Miniassistente pessoal
+
+<span class="tok-yellow">Nome do plugin:</span> meu-plugin-eventos
+<span class="tok-yellow">Nome da skill:</span> preparador-de-eventos
+<span class="tok-yellow">Problema que resolve:</span> preparar aulas e workshops para iniciantes
+<span class="tok-yellow">Quando usar:</span> quando eu pedir roteiro, checklist ou material de evento
+<span class="tok-yellow">Automação:</span> toda quinta às 15h, revisar os eventos da próxima semana
+<span class="tok-yellow">Resultado esperado:</span> checklist com pendências, riscos e próximos passos</pre>
+    </div>
+  </div>
+
+  <script>
+    let currentSlide = 0;
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const totalSlides = slides.length;
+    const progressWrap = document.getElementById('progress-wrap');
+    const counter = document.getElementById('slide-counter');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+
+    slides.forEach((_, index) => {
+      const dot = document.createElement('button');
+      dot.className = `prog-dot ${index === 0 ? 'active' : ''}`;
+      dot.type = 'button';
+      dot.setAttribute('aria-label', `Ir para slide ${index + 1}`);
+      dot.addEventListener('click', () => goToSlide(index));
+      progressWrap.appendChild(dot);
+    });
+    const dots = Array.from(document.querySelectorAll('.prog-dot'));
+
+    function updateNav() {
+      counter.innerText = `${currentSlide + 1} / ${totalSlides}`;
+      prevBtn.disabled = currentSlide === 0;
+      nextBtn.innerHTML = currentSlide === totalSlides - 1
+        ? 'Finalizar <i class="bi bi-check-lg"></i>'
+        : 'Próximo <i class="bi bi-chevron-right"></i>';
+      dots.forEach((dot, index) => dot.classList.toggle('active', index === currentSlide));
+    }
+
+    function goToSlide(index) {
+      if (index === currentSlide || index < 0 || index >= totalSlides) return;
+      slides.forEach((slide) => slide.classList.remove('active', 'exit'));
+      if (index > currentSlide) slides[currentSlide].classList.add('exit');
+      slides[index].classList.add('active');
+      currentSlide = index;
+      updateNav();
+    }
+    function nextSlide() {
+      if (currentSlide < totalSlides - 1) goToSlide(currentSlide + 1);
+    }
+    function prevSlide() {
+      if (currentSlide > 0) goToSlide(currentSlide - 1);
+    }
+
+    prevBtn.addEventListener('click', prevSlide);
+    nextBtn.addEventListener('click', nextSlide);
+
+    document.querySelectorAll('[data-modal]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const modal = document.getElementById(button.dataset.modal);
+        if (modal) modal.classList.add('is-open');
+      });
+    });
+    document.querySelectorAll('[data-close]').forEach((button) => {
+      button.addEventListener('click', () => button.closest('.modal').classList.remove('is-open'));
+    });
+    document.querySelectorAll('.modal').forEach((modal) => {
+      modal.addEventListener('click', (event) => {
+        if (event.target === modal) modal.classList.remove('is-open');
+      });
+    });
+    window.addEventListener('keydown', (event) => {
+      const hasModal = document.querySelector('.modal.is-open');
+      if (event.key === 'Escape' && hasModal) {
+        hasModal.classList.remove('is-open');
+        return;
+      }
+      if (hasModal) return;
+      if (event.key === 'ArrowRight' || event.key === ' ') nextSlide();
+      if (event.key === 'ArrowLeft') prevSlide();
+    });
+
+    updateNav();
+  </script>
+</body>
+</html>
